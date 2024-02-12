@@ -473,36 +473,44 @@ function shuffleChar(str, iterations) {
  * @returns {number} The nearest larger number, or original number if none exists.
  */
 function getNearestBigger(number) {
-  function getPermutations(num) {
-    const permutations = new Set();
-    function backtrack(curr, remaining) {
-      if (remaining.length === 0) {
-        permutations.add(parseInt(curr, 10));
-        return;
-      }
-      for (let i = 0; i < remaining.length; i += 1) {
-        backtrack(
-          curr + remaining[i],
-          remaining.slice(0, i) + remaining.slice(i + 1)
-        );
+  const numberStr = [...String(number)].map(Number);
+  const n = numberStr.length;
+  for (let i = -2; i >= -n; i -= 1) {
+    const array = [];
+    let minHigherIndex = null;
+
+    for (let j = -1; j > i; j -= 1) {
+      array.unshift(numberStr[numberStr.length + j]);
+
+      if (numberStr[numberStr.length + j] > numberStr[numberStr.length + i]) {
+        if (!minHigherIndex) minHigherIndex = j;
+        else if (
+          numberStr[numberStr.length + j] <
+          numberStr[numberStr.length + minHigherIndex]
+        )
+          minHigherIndex = j;
       }
     }
 
-    const numStr = `${num}`;
+    if (minHigherIndex !== i && minHigherIndex !== null) {
+      const temp = numberStr[numberStr.length + i];
+      numberStr[numberStr.length + i] = array[array.length + minHigherIndex];
+      array[array.length + minHigherIndex] = temp;
 
-    backtrack('', numStr);
-    return Array.from(permutations).sort((a, b) => a - b);
-  }
+      array.sort((a, b) => a - b);
 
-  const container = getPermutations(number);
-  let min = Infinity;
-  for (let i = 0; i < container.length; i += 1) {
-    if (container[i] > number && container[i] < min) {
-      min = container[i];
+      for (let k = -1; k >= -array.length; k -= 1) {
+        numberStr[numberStr.length + k] = array[array.length + k];
+      }
+
+      let newNumber = 0;
+      for (let m = -1; m >= -n; m -= 1) {
+        newNumber += numberStr[numberStr.length + m] * 10 ** (-m - 1);
+      }
+      return newNumber;
     }
   }
-
-  return min !== Infinity ? min : number;
+  return number;
 }
 
 module.exports = {
